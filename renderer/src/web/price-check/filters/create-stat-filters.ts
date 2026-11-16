@@ -267,9 +267,13 @@ export function calculatedStatToFilter (
   }
 
   if (roll && !filter.option) {
-    if (item.rarity === ItemRarity.Magic && (
-      item.isUnmodifiable || item.isCorrupted || item.isMirrored
-    )) {
+    if (
+      (item.rarity === ItemRarity.Magic && (
+        item.isUnmodifiable || item.isCorrupted || item.isMirrored
+      )) ||
+      // Viscera can't be modified, search for exact rolls
+      item.category === ItemCategory.Viscera
+    ) {
       percent = 0
     } else if (
       item.rarity === ItemRarity.Unique ||

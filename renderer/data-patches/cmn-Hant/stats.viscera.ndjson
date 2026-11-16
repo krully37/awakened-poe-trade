@@ -1,0 +1,1 @@
+{"ref":"+# Physical Damage taken from Attack Hits","better":-1,"matchers":[{"string":"攻擊擊中 # 承受物理傷害"}],"trade":{"ids":{"explicit":["explicit.stat_3441651621"],"implicit":["implicit.stat_3441651621"],"fractured":["fractured.stat_3441651621"]}}}

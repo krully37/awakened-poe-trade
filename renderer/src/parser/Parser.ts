@@ -38,7 +38,9 @@ const parsers: Array<ParserFn | { virtual: VirtualParserFn }> = [
   parseCategoryByHelpText,
   { virtual: parseMapTier },
   { virtual: normalizeName },
+  { virtual: parseVisceraName },
   { virtual: findInDatabase },
+  { virtual: parseVisceraRarity },
   // -----------
   parseItemLevel,
   parseTalismanTier,
@@ -81,6 +83,7 @@ const parsers: Array<ParserFn | { virtual: VirtualParserFn }> = [
   parseModifiers, // scourge
   parseModifiers, // implicit
   parseModifiers, // explicit
+  parseVisceraModifiers,
   { virtual: augmentModifiers },
   { virtual: transformToLegacyModifiers },
   { virtual: parseFractured },
@@ -839,6 +842,37 @@ function parseModifiers (section: string[], item: ParsedItem) {
   return 'SECTION_PARSED'
 }
 
+function parseVisceraModifiers (section: string[], item: ParsedItem) {
+  if (item.category !== ItemCategory.Viscera) return 'PARSER_SKIPPED'
+  // modifiers were already parsed using advanced mod descriptions
+  if (item.newMods.length) return 'PARSER_SKIPPED'
+
+  const modifier: ParsedModifier = {
+    info: { type: ModifierType.Implicit, tags: [] },
+    stats: []
+  }
+  const statIterator = linesToStatStrings(section)
+  let stat = statIterator.next()
+  while (!stat.done) {
+    const parsedStat = tryParseTranslation(stat.value, modifier.info.type, item.category)
+    if (parsedStat) {
+      modifier.stats.push(parsedStat)
+      stat = statIterator.next(true)
+    } else {
+      stat = statIterator.next(false)
+    }
+  }
+  // flavour text, help text, etc.
+  if (!modifier.stats.length) return 'SECTION_SKIPPED'
+
+  item.newMods.push(modifier)
+  item.unknownModifiers.push(...stat.value.map(line => ({
+    text: line,
+    type: modifier.info.type
+  })))
+  return 'SECTION_PARSED'
+}
+
 function parseMirrored (section: string[], item: ParsedItem) {
   if (section[0] === _$.MIRRORED) {
     item.isMirrored = true
@@ -972,6 +1006,28 @@ function parseVestigial (item: ParserState) {
   if (_$.VESTIGIAL_NAME.test(item.baseType)) {
     item.baseType = _$.VESTIGIAL_NAME.exec(item.baseType)![1]
     item.isVestigial = true
+  }
+}
+
+function parseVisceraName (item: ParserState) {
+  // Viscera don't have Rarity line, and can be prefixed with "Lesser" / "Greater"
+  if (item.rarity || item.category || item.baseType) return
+
+  const execResult = _$.VISCERA_NAME.exec(item.name)
+  if (!execResult) return
+
+  const baseType = execResult[1]
+  if (
+    !ITEM_BY_TRANSLATED('ITEM', item.name)?.length &&
+    ITEM_BY_TRANSLATED('ITEM', baseType)?.[0].craftable?.category === ItemCategory.Viscera
+  ) {
+    item.name = baseType
+  }
+}
+
+function parseVisceraRarity (item: ParserState) {
+  if (item.category === ItemCategory.Viscera && !item.rarity) {
+    item.rarity = ItemRarity.Normal
   }
 }
 

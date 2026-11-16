@@ -130,6 +130,7 @@ export default {
   FOULBORN_MODIFIER: 'Нечестивое уникальное свойство',
   VESTIGIAL_NAME: /^Вырожденный: (.*)$/,
   VESTIGIAL_IMPLICIT: 'Собственное свойство вояжа',
+  VISCERA_NAME: /^(?:Мелкая|Крупная) часть тела: (.*)$/,
   MAP_AREA: 'Область карты: ',
   CHART_SULPHUR: 'Мертвецкая сера: ',
   MERCENARY_LEVEL: 'Уровень наёмника: ',
