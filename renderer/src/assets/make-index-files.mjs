@@ -4,10 +4,13 @@ import fnv1a from '@sindresorhus/fnv1a'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { applyDataPatches } from './apply-data-patches.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export function makeIndexFiles () {
+  applyDataPatches()
+
   const LANGUAGES = ['en', 'ru', 'cmn-Hant', 'ko']
 
   for (const lang of LANGUAGES) {

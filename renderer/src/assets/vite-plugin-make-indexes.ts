@@ -12,6 +12,7 @@ export function makeIndexFilesPlugin (): Plugin {
     },
     configureServer (server) {
       server.watcher.add(path.resolve(__dirname, '../../public/data/**/*.ndjson'))
+      server.watcher.add(path.resolve(__dirname, '../../data-patches/**/*.ndjson'))
       server.watcher.on('change', (file) => {
         if (file.endsWith('.ndjson')) {
           if (timeout) {
